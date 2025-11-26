@@ -14,15 +14,22 @@ pipeline {
             }
         }
 
-        stage('Build with Maven') {
+        stage('Setup Maven') {
             steps {
-                withMaven(maven: 'MAVEN') {
-                    sh 'mvn clean package -DskipTests'
+                script {
+                    MAVEN_HOME = tool 'Maven'   // <<< Name from Global Tool Configuration
                 }
+                sh "${MAVEN_HOME}/bin/mvn -version"
             }
         }
 
-        stage('Run App (Optional)') {
+        stage('Build with Maven') {
+            steps {
+                sh "${MAVEN_HOME}/bin/mvn clean package -DskipTests"
+            }
+        }
+
+        stage('Run App') {
             steps {
                 sh 'java -cp target/classes com.sbi.App'
             }
@@ -30,18 +37,17 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t $DOCKERHUB_USER/$IMAGE:$BUILD_NUMBER .'
+                sh "docker build -t $DOCKERHUB_USER/$IMAGE:$BUILD_NUMBER ."
             }
         }
 
         stage('Push to DockerHub') {
             steps {
-                withCredentials([usernamePassword(credentialsId: "Docker-Jenkins", usernameVariable: "USER", passwordVariable: "PASS")]) {
+                withCredentials([usernamePassword(credentialsId: 'Docker-Jenkins', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
                     sh 'echo $PASS | docker login -u $USER --password-stdin'
-                    sh 'docker push $DOCKERHUB_USER/$IMAGE:$BUILD_NUMBER'
+                    sh "docker push $DOCKERHUB_USER/$IMAGE:$BUILD_NUMBER"
                 }
             }
         }
-
     }
 }
