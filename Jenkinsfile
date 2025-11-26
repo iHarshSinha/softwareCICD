@@ -10,20 +10,19 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git 'https://github.com/iHarshSinha/softwareCICD.git'
+                git branch: 'main', url: 'https://github.com/iHarshSinha/softwareCICD.git'
             }
         }
 
-        stage('Build Java') {
+        stage('Build with Maven') {
             steps {
-                sh 'javac Main.java'
+                sh 'mvn clean package -DskipTests'
             }
         }
 
-        stage('Run App Once (Optional)') {
+        stage('Run App (Optional)') {
             steps {
-                sh 'echo "Running the app once for sanity check..."'
-                sh 'echo "4" | java Main'   // auto exit
+                sh 'java -cp target/classes com.sbi.App'
             }
         }
 
@@ -35,7 +34,7 @@ pipeline {
 
         stage('Push to DockerHub') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'Docker-Jenkins', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                withCredentials([usernamePassword(credentialsId: "Docker-Jenkins", usernameVariable: "USER", passwordVariable: "PASS")]) {
                     sh 'echo $PASS | docker login -u $USER --password-stdin'
                     sh 'docker push $DOCKERHUB_USER/$IMAGE:$BUILD_NUMBER'
                 }
