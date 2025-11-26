@@ -17,7 +17,7 @@ pipeline {
         stage('Setup Maven') {
             steps {
                 script {
-                    MAVEN_HOME = tool 'Maven'   // <<< Name from Global Tool Configuration
+                    MAVEN_HOME = tool 'Maven'
                 }
                 sh "${MAVEN_HOME}/bin/mvn -version"
             }
@@ -31,7 +31,7 @@ pipeline {
 
         stage('Run App') {
             steps {
-                sh 'java -cp target/classes com.sbi.App'
+                sh 'echo "4" | java -cp target/classes com.sbi.App'
             }
         }
 
@@ -49,5 +49,6 @@ pipeline {
                 }
             }
         }
+
     }
 }
