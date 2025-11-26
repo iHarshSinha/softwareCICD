@@ -4,6 +4,7 @@ pipeline {
     environment {
         DOCKERHUB_USER = "iharshsinha2004"
         IMAGE = "todo-app"
+        PATH = "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
     }
 
     stages {
@@ -35,6 +36,14 @@ pipeline {
             }
         }
 
+        stage('Check Docker') {
+            steps {
+                sh 'echo "Checking Docker path..."'
+                sh 'which docker'
+                sh 'docker --version'
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
                 sh "docker build -t $DOCKERHUB_USER/$IMAGE:$BUILD_NUMBER ."
@@ -49,6 +58,5 @@ pipeline {
                 }
             }
         }
-
     }
 }
